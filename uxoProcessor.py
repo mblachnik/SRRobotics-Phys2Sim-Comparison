@@ -78,7 +78,7 @@ def read_phys_data(fDir : str, sample_dist = 0.1, maxValue = 6.8, window_size = 
 def magnetometer_read(fName, subtractMin=False):
     """
 
-    Read single data file containing recorded signal from magnetometer
+    Read single data file containing recorded signal from Sensys magnetometer
     Parameters
     ----------
     fName : TYPE
@@ -134,6 +134,8 @@ def magnetometer_read(fName, subtractMin=False):
 
 def convert_2D_to_3D_column_names(df):
     """
+    In oryginal dataset with numerical simulation results columns have two levels (Pojazd_?,X_? or Y_? or + Z_?) 
+    This function converst 2 level index into 3 level index where we have (Pojazd_?,X or Y or Z, sample_id)
     COnverts column names from
     ('Pojazd_1', 'X_0') => ('Pojazd_1', 'X',  '0'),
     ('Pojazd_1', 'Y_0') => ('Pojazd_1', 'Y',  '0'),
@@ -175,7 +177,7 @@ def format_dataframe(df:pd.DataFrame, window_size:int=7, maxValue:float=6.8, sam
     It includes:
         - moving window averagining in order to reduce the impact of noise
         - sampling the recorded magnetomater data with given period. Column D
-          denotes the distances between samples
+          denotes the distances between samples (the desired ones)
 
     Parameters
     ----------
@@ -225,6 +227,7 @@ def format_dataframe(df:pd.DataFrame, window_size:int=7, maxValue:float=6.8, sam
     return df
 
 def read_label(fName):
+#Simple function to label assigned to given simulation or physical data, where in given directory we search for a file which contains labels
     with open(fName, 'r') as file:
         label = file.readline()
     return label
@@ -233,7 +236,7 @@ def read_label(fName):
 def addMetaToPhys(df, fMeta, rozmiarRury = [450, 800], wysokosci = [140, 240] ):
     """
     This function reads and adds metadata to the physical model.
-    By default it reads meta data as provided by Sławek
+    By default it reads meta data as provided by Sławek json file
     It recognizes wysokosc, długoć etc,
 
     Parameters
@@ -383,6 +386,20 @@ def fileNameParser(df, reffs):
     #     df.loc[:,('Meta',i,"")] = df.loc[:,('Meta',i,"")].apply(j)
 
 def addModule(df):
+     """
+    For each sample (each row and each pojazd it adds a set of extra features called Module which is caluclated from X,Y,Z coordinated
+        
+    Parameters
+    ----------
+    df : TYPE
+        Inpud DataFrame
+
+    Returns
+    -------
+    df : TYPE
+        DataFrame with additional columns containing Module
+
+    """   
     cols0 = df.columns.levels[0]
     cols0 = [col for col in cols0 if col!='Meta']
     dfs = list()
